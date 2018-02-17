@@ -15,8 +15,9 @@ var TRAILING = /(\s)+$/g;
  * @constructor
  * @param {FontProvider} fontProvider
  */
-function TextTools(fontProvider) {
+function TextTools(fontProvider, docMeasure) {
 	this.fontProvider = fontProvider;
+	this.docMeasure = docMeasure;
 }
 
 /**
@@ -28,7 +29,7 @@ function TextTools(fontProvider) {
  * @return {Object}                   collection of inlines, minWidth, maxWidth
  */
 TextTools.prototype.buildInlines = function (textArray, styleContextStack) {
-	var measured = measure(this.fontProvider, textArray, styleContextStack);
+	var measured = measure(this.fontProvider, textArray, styleContextStack, this.docMeasure);
 
 	var minWidth = 0,
 		maxWidth = 0,
@@ -164,6 +165,11 @@ function normalizeTextArray(array, styleContextStack) {
 		var style = null;
 		var words;
 
+                if (item.image) {
+                        results.push(item)
+                        continue
+                }
+
 		var noWrap = getStyleProperty(item || {}, styleContextStack, 'noWrap', false);
 		if (isObject(item)) {
 			words = splitWords(normalizeString(item.text), noWrap);
@@ -225,7 +231,7 @@ function getStyleProperty(item, styleContextStack, property, defaultValue) {
 	}
 }
 
-function measure(fontProvider, textArray, styleContextStack) {
+function measure(fontProvider, textArray, styleContextStack, docMeasure) {
 	var normalized = normalizeTextArray(textArray, styleContextStack);
 
 	if (normalized.length) {
@@ -256,6 +262,8 @@ function measure(fontProvider, textArray, styleContextStack) {
 		var preserveLeadingSpaces = getStyleProperty(item, styleContextStack, 'preserveLeadingSpaces', false);
 
 		var font = fontProvider.provideFont(fontName, bold, italics);
+
+                if (item.image) return docMeasure.measureImage(item)
 
 		item.width = widthOfString(item.text, font, fontSize, characterSpacing, fontFeatures);
 		item.height = font.lineHeight(fontSize) * lineHeight;

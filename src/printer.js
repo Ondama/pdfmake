@@ -385,7 +385,8 @@ function renderLine(line, x, y, pdfKitDoc) {
 	//TODO: line.optimizeInlines();
 	for (var i = 0, l = line.inlines.length; i < l; i++) {
 		var inline = line.inlines[i];
-		var shiftToBaseline = lineHeight - ((inline.font.ascender / 1000) * inline.fontSize) - descent;
+                var diff = !inline.font ? inline._height : ((inline.font.ascender / 1000) * inline.fontSize)
+		var shiftToBaseline = lineHeight - diff - descent;
 		var options = {
 			lineBreak: false,
 			textWidth: inline.width,
@@ -402,7 +403,11 @@ function renderLine(line, x, y, pdfKitDoc) {
 
 		pdfKitDoc._font = inline.font;
 		pdfKitDoc.fontSize(inline.fontSize);
-		pdfKitDoc.text(inline.text, x + inline.x, y + shiftToBaseline, options);
+                if (inline.image) {
+		        pdfKitDoc.image(inline.image, x + inline.x, y + shiftToBaseline, {width: inline.width});
+                } else {
+		        pdfKitDoc.text(inline.text, x + inline.x, y + shiftToBaseline, options);
+                }
 
 		if (inline.linkToPage) {
 			var _ref = pdfKitDoc.ref({Type: 'Action', S: 'GoTo', D: [inline.linkToPage, 0, 0]}).end();

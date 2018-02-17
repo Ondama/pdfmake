@@ -19,7 +19,7 @@ Line.prototype.getAscenderHeight = function () {
 	var y = 0;
 
 	this.inlines.forEach(function (inline) {
-		y = Math.max(y, inline.font.ascender / 1000 * inline.fontSize);
+		y = Math.max(y, !inline.font ? inline._height : (inline.font.ascender / 1000 * inline.fontSize));
 	});
 	return y;
 };
@@ -63,7 +63,7 @@ Line.prototype.getHeight = function () {
 	var max = 0;
 
 	this.inlines.forEach(function (item) {
-		max = Math.max(max, item.height || 0);
+		max = Math.max(max, item.height || item._height || 0);
 	});
 
 	return max;
