@@ -19,6 +19,8 @@ function DocumentContext(pageSize, pageMargins) {
 
 	this.snapshots = [];
 
+	this.breakpoints = [];
+
 	this.endingCell = null;
 
 	this.tracker = new TraversalTracker();
@@ -214,7 +216,7 @@ var getPageSize = function (currentPage, newPageOrientation) {
 };
 
 
-DocumentContext.prototype.moveToNextPage = function (pageOrientation) {
+DocumentContext.prototype.moveToNextPage = function (pageOrientation, resetPageCount) {
 	var nextPageIndex = this.page + 1;
 
 	var prevPage = this.page;
@@ -226,6 +228,7 @@ DocumentContext.prototype.moveToNextPage = function (pageOrientation) {
 		var currentPageOrientation = this.getCurrentPage().pageSize.orientation;
 
 		var pageSize = getPageSize(this.getCurrentPage(), pageOrientation);
+                if (resetPageCount) this.breakpoints.push(this.pages.length)
 		this.addPage(pageSize);
 
 		if (currentPageOrientation === pageSize.orientation) {
